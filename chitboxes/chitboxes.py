@@ -1,4 +1,4 @@
-import reportlab.pdfgen as pdfg
+import reportlab.pdfgen.canvas as canvas
 from reportlab.lib.pagesizes import LETTER, A4
 from reportlab.lib.units import cm
 from reportlab.lib.utils import ImageReader
@@ -28,7 +28,7 @@ class ChitBoxGenerator:
 
         assert fname
         print 'generating to', fname, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage
-        self.canvas = pdfg.canvas.Canvas(fname, pagesize=self.pagesize)
+        self.canvas = canvas.Canvas(fname, pagesize=self.pagesize)
         self.filename = fname
 
     @staticmethod
@@ -203,7 +203,7 @@ class ChitBoxGenerator:
             return sample_out
 
 
-if __name__ == '__main__':
+def main():
     c = ChitBoxGenerator(4.5 * cm, 4.5 * cm, 2.5 * cm, 'cob_ship.pdf',
                          'cob_ship.png', 'cob_ship_side.png')
     c.generate()

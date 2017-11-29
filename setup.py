@@ -7,7 +7,7 @@ setup(
     version=version,
     entry_points={
         'console_scripts': [
-            "chitboxes = chitboxes:main"
+            "chitboxes = chitboxes.chitboxes:main"
         ],
     },
     packages=find_packages(exclude=['tests']),
