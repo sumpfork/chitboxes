@@ -47,25 +47,25 @@ class ChitBoxGenerator:
         return ChitBoxGenerator(raw_width * cm, raw_height * cm,
                                 raw_depth * cm, fname, cImRead, sImRead, ps)
 
-    def drawCentre(self):
+    def drawImage(self, image, width, height):
         self.canvas.drawImage(
-            self.centreImage,
-            -self.width / 2.0,
-            -self.height / 2.0,
-            self.width,
-            self.height,
-            preserveAspectRatio=False,
-            mask='auto')
-
-    def drawSide(self, width, height):
-        self.canvas.drawImage(
-            self.sideImage,
+            image,
             -width / 2.0,
             -height / 2.0,
             width,
             height,
             preserveAspectRatio=False,
             mask='auto')
+
+    def drawCentre(self):
+        self.drawImage(self.centreImage,
+                       self.width,
+                       self.height)
+
+    def drawSide(self, width, height):
+        self.drawImage(self.sideImage,
+                       width,
+                       height)
 
     def drawFullSides(self, offset, width, height):
         self.canvas.saveState()
@@ -125,6 +125,7 @@ class ChitBoxGenerator:
     def generatePage(self, scale=1.0):
 
         self.canvas.saveState()
+        # self.canvas.setStrokeColorCMYK(0.0, 1.0, 0.0, 0.0)
 
         # everything's centred
         self.canvas.translate(self.pagesize[0] / 2.0, self.pagesize[1] / 2.0)
@@ -133,7 +134,7 @@ class ChitBoxGenerator:
         self.canvas.saveState()
 
         # most drawing is rotated 45 degrees
-        # self.canvas.rotate(-45)
+        self.canvas.rotate(-45)
 
         self.drawCentre()
 
@@ -159,8 +160,6 @@ class ChitBoxGenerator:
         c2 = (0, self.height + 2 * self.depth)
         c3 = (self.width + 2 * self.depth, 0)
         c4 = (0, -self.height - 2 * self.depth)
-        #        for cs,ce in [(c1,c2),(c2,c3),(c3,c4),(c4,c1)]:
-        #            self.canvas.line(cs[0],cs[1],ce[0],ce[1])
 
         for l in [(c1, c2), (c2, c3), (c3, c4), (c4, c1)]:
             v1 = np.array(l[0])
@@ -173,6 +172,7 @@ class ChitBoxGenerator:
             self.canvas.line(0, 0, norm(v), 0)
             self.canvas.rect(-50 * cm, 0, 100 * cm, 50 * cm, fill=1, stroke=0)
             self.canvas.restoreState()
+
         self.canvas.restoreState()
 
         # we're now back to being centred on the page, but not rotated anymore
@@ -204,6 +204,6 @@ class ChitBoxGenerator:
 
 
 def main():
-    c = ChitBoxGenerator(4.5 * cm, 4.5 * cm, 2.5 * cm, 'cob_ship.pdf',
+    c = ChitBoxGenerator(4.5 * cm, 1.5 * cm, 1.5 * cm, 'cob_ship.pdf',
                          'cob_ship.png', 'cob_ship_side.png')
     c.generate()
