@@ -27,7 +27,7 @@ class ChitBoxGenerator:
         self.pagesize = pagesize
 
         assert fname
-        print 'generating to', fname, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage
+        print('generating to', fname, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage)
         self.canvas = canvas.Canvas(fname, pagesize=self.pagesize)
         self.filename = fname
 
@@ -189,14 +189,14 @@ class ChitBoxGenerator:
         self.canvas.save()
 
     def generate_sample(self):
-        import cStringIO
+        import io
         from wand.image import Image
-        buf = cStringIO.StringIO()
+        buf = io.StringIO()
         tmp_fname = self.fname
         self.fname = buf
         self.generate()
         self.fname = tmp_fname
-        sample_out = cStringIO.StringIO()
+        sample_out = io.StringIO()
         with Image(blob=buf.getvalue(), resolution=75) as sample:
             sample.format = 'png'
             sample.save(sample_out)
