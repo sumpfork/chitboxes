@@ -26,10 +26,8 @@ class ChitBoxGenerator:
         self.sideImage = sideImage
         self.pagesize = pagesize
 
-        assert fname
-        print('generating to', fname, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage)
-        self.canvas = canvas.Canvas(fname, pagesize=self.pagesize)
         self.filename = fname
+        self.canvas = None
 
     @staticmethod
     def fromRawData(raw_width,
@@ -39,8 +37,8 @@ class ChitBoxGenerator:
                     cIm,
                     sIm,
                     pagesize='letter'):
-        cImRead = ImageReader(PIL.Image.open(cIm))
-        sImRead = ImageReader(PIL.Image.open(sIm))
+        cImRead = ImageReader(PIL.Image.open(cIm)) if cIm else None
+        sImRead = ImageReader(PIL.Image.open(sIm)) if sIm else None
         ps = LETTER
         if pagesize == 'A4':
             ps = A4
@@ -58,14 +56,16 @@ class ChitBoxGenerator:
             mask='auto')
 
     def drawCentre(self):
-        self.drawImage(self.centreImage,
-                       self.width,
-                       self.height)
+        if self.centreImage:
+            self.drawImage(self.centreImage,
+                           self.width,
+                           self.height)
 
     def drawSide(self, width, height):
-        self.drawImage(self.sideImage,
-                       width,
-                       height)
+        if self.sideImage:
+            self.drawImage(self.sideImage,
+                           width,
+                           height)
 
     def drawFullSides(self, offset, width, height):
         self.canvas.saveState()
@@ -183,6 +183,8 @@ class ChitBoxGenerator:
         self.canvas.restoreState()
 
     def generate(self):
+        print('generating to', self.filename, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage)
+        self.canvas = canvas.Canvas(self.filename, pagesize=self.pagesize)
         self.generatePage()
         self.canvas.showPage()
         self.generatePage(0.95)
@@ -191,16 +193,16 @@ class ChitBoxGenerator:
     def generate_sample(self):
         import io
         from wand.image import Image
-        buf = io.StringIO()
-        tmp_fname = self.fname
-        self.fname = buf
+        buf = io.BytesIO()
+        tmp_fname = self.filename
+        self.filename = buf
         self.generate()
-        self.fname = tmp_fname
-        sample_out = io.StringIO()
+        self.filename = tmp_fname
+        sample_out = io.BytesIO()
         with Image(blob=buf.getvalue(), resolution=75) as sample:
             sample.format = 'png'
             sample.save(sample_out)
-            return sample_out
+            return sample_out.getvalue()
 
 
 def main():
