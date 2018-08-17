@@ -141,6 +141,86 @@ class ChitBoxGenerator:
         self.drawCentre()
         self.canvas.restoreState()
 
+    def drawCutLines(self):
+
+        def drawArrowHead():
+            p = self.canvas.beginPath()
+            xcenter = 0
+            radius = 0.1 * cm
+            height = 0.6 * cm
+            p.moveTo(xcenter - radius, height)
+            p.lineTo(xcenter, 0)
+            p.lineTo(xcenter + radius, height)
+            p.lineTo(xcenter - radius, height)
+            self.canvas.drawPath(p, fill=1)
+
+        length = 0.6 * cm
+        self.canvas.saveState()
+        self.canvas.setDash(5, 2)
+        self.canvas.setStrokeColorRGB(0, 0, 0)
+        self.canvas.translate(self.width / 2., self.height / 2. + 2 * self.depth)
+        self.canvas.line(0, 0, 0, length)
+        self.canvas.translate(-self.width, 0)
+        self.canvas.line(0, 0, 0, length)
+        self.canvas.setDash(1, 0)
+        self.canvas.translate(0, length + 0.2 * cm)
+        drawArrowHead()
+        self.canvas.translate(self.width, 0)
+        drawArrowHead()
+
+        self.canvas.restoreState()
+
+    def drawTopFoldLines(self):
+        length = 0.6 * cm
+
+        self.canvas.saveState()
+        self.canvas.setDash(1, 1)
+        self.canvas.setStrokeColorRGB(0, 0, 0)
+
+        self.canvas.translate(self.width / 2. + 2 * self.depth, self.height / 2.)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-2 * self.depth - self.width, 0)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(0, -self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, 0)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.restoreState()
+
+    def drawSideFoldLines(self):
+        length = 0.6 * cm
+
+        self.canvas.saveState()
+        self.canvas.setDash(1, 1)
+        self.canvas.setStrokeColorRGB(0, 0, 0)
+
+        self.canvas.translate(self.height / 2. + 2 * self.depth, self.width / 2.)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.width, 0)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, -self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.translate(-self.depth, -self.depth)
+        self.canvas.line(0, 0, 0, length)
+
+        self.canvas.restoreState()
+
     def generatePage(self, scale=1.0):
 
         self.canvas.saveState()
@@ -192,13 +272,38 @@ class ChitBoxGenerator:
             self.canvas.rect(-50 * cm, 0, 100 * cm, 50 * cm, fill=1, stroke=0)
             self.canvas.restoreState()
 
-        self.canvas.restoreState()
+
+        if self.height == self.width:
+            # my current simplistic way of calculating the positioning of these lines
+            # only works under this assumption
+            self.canvas.setLineWidth(0.1)
+
+            self.canvas.saveState()
+            self.drawCutLines()
+            self.canvas.rotate(180)
+            self.drawCutLines()
+            self.canvas.restoreState()
+
+            self.canvas.saveState()
+            self.canvas.rotate(90)
+            self.drawSideFoldLines()
+            self.canvas.rotate(180)
+            self.drawSideFoldLines()
+            self.canvas.restoreState()
+
+            self.canvas.saveState()
+            self.drawTopFoldLines()
+            self.canvas.rotate(180)
+            self.drawTopFoldLines()
+            self.canvas.restoreState()
 
         # we're now back to being centred on the page, but not rotated anymore
         # centreDiag = math.sqrt((self.width/2.0)**2+(self.height/2.0)**2)
         # diag = math.sqrt((2*self.depth)**2+self.width**2)
         # self.canvas.line(0,0,-math.sqrt(2.0)*self.height/2.0,0)
         # self.rect(
+
+        self.canvas.restoreState()
         self.canvas.restoreState()
 
     def generate(self):
@@ -228,7 +333,7 @@ class ChitBoxGenerator:
 
 
 def main():
-    c = ChitBoxGenerator(2.5 * cm, 1.5 * cm, 1.5 * cm, 'cob_ship.pdf',
+    c = ChitBoxGenerator(1.1 * cm, 2.5 * cm, 1.7 * cm, 'cob_ship.pdf',
                          'cob_ship.png', 'cob_ship_side.png')
     c.generate()
     # with open('sample.png', 'w') as f:
