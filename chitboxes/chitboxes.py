@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import reportlab.pdfgen.canvas as canvas
 from reportlab.lib.pagesizes import LETTER, A4
 from reportlab.lib.units import cm
@@ -28,6 +30,7 @@ class ChitBoxGenerator:
 
         self.filename = fname
         self.canvas = None
+        self.is_sample = False
 
     @staticmethod
     def fromRawData(raw_width,
@@ -56,13 +59,29 @@ class ChitBoxGenerator:
             mask='auto')
 
     def drawCentre(self):
-        if self.centreImage:
+        if self.is_sample:
+            self.canvas.saveState()
+            self.canvas.setFillColorRGB(0.7, 0.8, 0.9)
+            self.canvas.rect(-self.width / 2., -self.height / 2., self.width, self.height, fill=1)
+            self.canvas.setFillColorRGB(0.0, 0.0, 0.0)
+            self.canvas.setFontSize(15)
+            self.canvas.drawCentredString(0, 0, "Centre")
+            self.canvas.restoreState()
+        elif self.centreImage:
             self.drawImage(self.centreImage,
                            self.width,
                            self.height)
 
     def drawSide(self, width, height):
-        if self.sideImage:
+        if self.is_sample:
+            self.canvas.saveState()
+            self.canvas.setFillColorRGB(0.9, 0.8, 0.6)
+            self.canvas.rect(-width / 2., -height / 2., width, height, fill=1)
+            self.canvas.setFillColorRGB(0.0, 0.0, 0.0)
+            self.canvas.setFontSize(15)
+            self.canvas.drawCentredString(0, 0, "Side")
+            self.canvas.restoreState()
+        elif self.sideImage:
             self.drawImage(self.sideImage,
                            width,
                            height)
@@ -183,7 +202,8 @@ class ChitBoxGenerator:
         self.canvas.restoreState()
 
     def generate(self):
-        print('generating to', self.filename, 'using', self.width, self.height, self.depth, self.centreImage, self.sideImage)
+        print('generating to {} using {}x{}x{} {} {}'.format(
+            self.filename, self.width, self.height, self.depth, self.centreImage, self.sideImage))
         self.canvas = canvas.Canvas(self.filename, pagesize=self.pagesize)
         self.generatePage()
         self.canvas.showPage()
@@ -196,8 +216,10 @@ class ChitBoxGenerator:
         buf = io.BytesIO()
         tmp_fname = self.filename
         self.filename = buf
+        self.is_sample = True
         self.generate()
         self.filename = tmp_fname
+        self.is_sample = False
         sample_out = io.BytesIO()
         with Image(blob=buf.getvalue(), resolution=75) as sample:
             sample.format = 'png'
@@ -206,6 +228,12 @@ class ChitBoxGenerator:
 
 
 def main():
-    c = ChitBoxGenerator(4.5 * cm, 1.5 * cm, 1.5 * cm, 'cob_ship.pdf',
+    c = ChitBoxGenerator(2.5 * cm, 1.5 * cm, 1.5 * cm, 'cob_ship.pdf',
                          'cob_ship.png', 'cob_ship_side.png')
     c.generate()
+    # with open('sample.png', 'w') as f:
+    #     f.write(c.generate_sample())
+
+
+if __name__ == '__main__':
+    main()

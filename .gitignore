@@ -5,3 +5,5 @@
 *.png
 *.jpg
 *.pxm
+chitboxes/chitboxes.py.bak
+*egg-info
